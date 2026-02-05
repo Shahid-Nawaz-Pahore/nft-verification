@@ -66,8 +66,8 @@ const swaggerSpec = swaggerJsdoc({
     },
     servers: [
       {
-        url: `http://localhost:${PORT}`,
-        description: 'Local',
+        url: '/',
+        description: 'Current deployment',
       },
     ],
   },
@@ -329,3 +329,8 @@ if (!process.env.VERCEL) {
 
 // Export for Vercel serverless
 export default app;
+export const config = {
+  api: {
+    bodyParser: false, // let Express handle parsing
+  },
+};

@@ -9,5 +9,10 @@
   "env": {
     "CHAIN": "abstract",
     "COLLECTION_SLUG": "hamieverse-genesis"
+  },
+  "functions": {
+    "index.js": {
+      "runtime": "nodejs20.x"
+    }
   }
 }
