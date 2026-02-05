@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/docs", "destination": "/api/index/docs" },
-    { "source": "/swagger.json", "destination": "/api/index/swagger.json" },
-    { "source": "/health", "destination": "/api/index/health" },
-    { "source": "/api/reveal", "destination": "/api/index/api/reveal" },
-    { "source": "/api/(.*)", "destination": "/api/index/api/$1" }
+  "routes": [
+    { "src": "/docs", "dest": "/api/index/docs" },
+    { "src": "/swagger.json", "dest": "/api/index/swagger.json" },
+    { "src": "/health", "dest": "/api/index/health" },
+    { "src": "/api/reveal", "dest": "/api/index/api/reveal" },
+    { "src": "/api/(.*)", "dest": "/api/index/api/$1" }
   ]
 }
