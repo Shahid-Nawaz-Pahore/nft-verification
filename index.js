@@ -1,6 +1,5 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { OpenSeaAPI } from 'opensea-js/lib/api/index.js';
 import { Chain } from 'opensea-js/lib/types.js';
@@ -196,8 +195,40 @@ app.use((err, req, res, next) => {
   return next(err);
 });
 
-// Swagger UI
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Serve raw OpenAPI spec
+app.get('/swagger.json', (_, res) => res.json(swaggerSpec));
+
+// Minimal Swagger UI using CDN (works reliably on Vercel)
+app.get('/docs', (_, res) => {
+  res.type('html').send(`
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Reveal API Docs</title>
+        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+        <style>
+          body { margin: 0; }
+          #swagger-ui { height: 100vh; }
+        </style>
+      </head>
+      <body>
+        <div id="swagger-ui"></div>
+        <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+        <script>
+          window.onload = () => {
+            SwaggerUIBundle({
+              url: '/swagger.json',
+              dom_id: '#swagger-ui',
+              presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+              layout: "BaseLayout"
+            });
+          };
+        </script>
+      </body>
+    </html>
+  `);
+});
 
 // --------------------
 // Helpers
