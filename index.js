@@ -1,5 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import { OpenSeaAPI } from 'opensea-js/lib/api/index.js';
 import { Chain } from 'opensea-js/lib/types.js';
 
@@ -52,6 +54,126 @@ const CARD_MAP = {
 };
 
 // --------------------
+// Swagger setup
+// --------------------
+const swaggerSpec = swaggerJsdoc({
+  definition: {
+    openapi: '3.0.3',
+    info: {
+      title: 'Reveal API',
+      version: '1.0.0',
+      description: 'Simple reveal endpoint that checks a wallet for a single NFT in the hamieverse-genesis collection and returns the character slug for redirect.',
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+        description: 'Local',
+      },
+    ],
+  },
+  apis: [], // we define inline below
+});
+
+swaggerSpec.paths = {
+  '/health': {
+    get: {
+      summary: 'Health check',
+      responses: {
+        200: {
+          description: 'OK',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: { ok: { type: 'boolean' } },
+              },
+              example: { ok: true },
+            },
+          },
+        },
+      },
+    },
+  },
+  '/api/reveal': {
+    post: {
+      summary: 'Reveal character by wallet',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['wallet'],
+              properties: {
+                wallet: {
+                  type: 'string',
+                  pattern: '^0x[a-fA-F0-9]{40}$',
+                  example: '0xd5cde0567c8d3a902d5e602ad4b94638c367008b',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Character found',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  tokenId: { type: 'string' },
+                  character: { type: 'string' },
+                  redirectUrl: { type: 'string' },
+                },
+              },
+              example: {
+                success: true,
+                tokenId: '9',
+                character: 'Ace Havoc',
+                redirectUrl: '/reveal/ace-havoc',
+              },
+            },
+          },
+        },
+        400: {
+          description: 'Invalid wallet, multiple NFTs, or mapping missing',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  error: {
+                    type: 'object',
+                    properties: {
+                      code: { type: 'string' },
+                      message: { type: 'string' },
+                    },
+                  },
+                },
+              },
+              example: {
+                success: false,
+                error: { code: 'INVALID_WALLET', message: 'Please enter a valid wallet address.' },
+              },
+            },
+          },
+        },
+        404: {
+          description: 'No NFT found in this collection',
+        },
+        500: {
+          description: 'Internal error',
+        },
+      },
+    },
+  },
+};
+
+// --------------------
 // Init
 // --------------------
 const app = express();
@@ -73,6 +195,9 @@ app.use((err, req, res, next) => {
   }
   return next(err);
 });
+
+// Swagger UI
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // --------------------
 // Helpers
@@ -178,7 +303,6 @@ app.post('/api/reveal', async (req, res) => {
     return res.json({
       success: true,
       tokenId,
-      cardId,
       character: character.name,
       redirectUrl: `/reveal/${character.slug}`,
     });
