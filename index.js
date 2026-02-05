@@ -321,6 +321,11 @@ app.post('/api/reveal', async (req, res) => {
 // --------------------
 // Start server
 // --------------------
-app.listen(PORT, () => {
-  console.log(`Reveal API running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Reveal API running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel serverless
+export default app;
