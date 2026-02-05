@@ -16,8 +16,7 @@ const CHAIN = (process.env.CHAIN || 'abstract').toLowerCase();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 if (!OPENSEA_API_KEY) {
-  console.error('Missing OPENSEA_API_KEY environment variable. Set it in .env');
-  process.exit(1);
+  console.warn('Missing OPENSEA_API_KEY environment variable. The /api/reveal endpoint will return 500 until it is set.');
 }
 
 const CHAIN_ENUM = Object.values(Chain).includes(CHAIN) ? CHAIN : Chain.Mainnet;
@@ -248,6 +247,9 @@ function parseRequestBody(req) {
 }
 
 async function fetchNftsByAccount(address) {
+  if (!OPENSEA_API_KEY) {
+    throw new Error('OPENSEA_API_KEY is not configured on the server');
+  }
   // Grab up to 50 NFTs for the account and filter by collection slug locally.
   const { nfts = [] } = await opensea.getNFTsByAccount(address, 50, undefined, CHAIN_ENUM);
   return { nfts: nfts.filter((nft) => nft.collection === COLLECTION_SLUG) };
@@ -340,7 +342,7 @@ app.post('/api/reveal', async (req, res) => {
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: 'Something went wrong. Please try again.',
+        message: err.message || 'Something went wrong. Please try again.',
       },
     });
   }

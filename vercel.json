@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/docs", "destination": "/api/index/docs" },
+    { "source": "/swagger.json", "destination": "/api/index/swagger.json" },
+    { "source": "/health", "destination": "/api/index/health" },
+    { "source": "/api/reveal", "destination": "/api/index/api/reveal" },
+    { "source": "/api/(.*)", "destination": "/api/index/api/$1" }
+  ]
+}
