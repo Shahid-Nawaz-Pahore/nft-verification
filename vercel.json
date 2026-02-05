@@ -1,10 +1,12 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "api/index.js", "use": "@vercel/node" }
+  ],
   "routes": [
-    { "src": "/docs", "dest": "/api/index/docs" },
-    { "src": "/swagger.json", "dest": "/api/index/swagger.json" },
-    { "src": "/health", "dest": "/api/index/health" },
-    { "src": "/api/reveal", "dest": "/api/index/reveal" },
-    { "src": "/api/(.*)", "dest": "/api/index/api/$1" }
+    { "src": "/docs", "dest": "/api/index" },
+    { "src": "/swagger.json", "dest": "/api/index" },
+    { "src": "/health", "dest": "/api/index" },
+    { "src": "/api/(.*)", "dest": "/api/index" }
   ]
 }
